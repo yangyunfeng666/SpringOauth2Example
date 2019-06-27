@@ -14,7 +14,7 @@ public class OauthApplicationTests {
     public void contextLoads() {
 
        BCryptPasswordEncoder cryptPasswordEncoder =  new BCryptPasswordEncoder();
-       System.out.println(cryptPasswordEncoder.encode("123456"));
+       System.out.println(cryptPasswordEncoder.encode("112233"));
     }
 
 }

@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -32,9 +34,6 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
     private DataSource dataSource;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
     @Qualifier("customerUserDetailServiceImpl")
     private UserDetailsService userDetailsService;
 
@@ -52,7 +51,6 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
                 .accessTokenConverter(jwtAccessTokenConverter())
                 .authenticationManager(authenticationManager)
         .userDetailsService(userDetailsService);
-       // endpoints.authenticationManager(authenticationManager);
     }
 
     @Override
@@ -62,9 +60,16 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
                .allowFormAuthenticationForClients();
     }
 
+    //这个是定义授权的请求的路径的Bean
+    @Bean
+    public ClientDetailsService clientDetails() {
+        return new JdbcClientDetailsService(dataSource);
+    }
+
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory().withClient("webapp").secret(bCryptPasswordEncoder.encode("112233")).authorizedGrantTypes("password","refresh_token").scopes("read_userInfo","read_contacts");
+      clients.withClientDetails(clientDetails());
+      //clients.inMemory().withClient("webapp").secret(bCryptPasswordEncoder.encode("112233")).authorizedGrantTypes("password","refresh_token").scopes("read_userInfo","read_contacts");
     }
 
 
